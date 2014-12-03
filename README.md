@@ -13,6 +13,19 @@ Edit the following variables inside the Nessus_REST.pm file
   my $password = 'password';
   ```
 
+Requirements:
+================
+The following perl packages must be installed
+
+```perl
+LWD
+LWD::UserAgent
+JSON
+Data::Dumper   (For Debugging)
+Term::ANSIColor
+Getopt::Long
+```
+
 Usage:
 ================
     usage: ./REST_runner.pl <command> [ <command-options> ]
