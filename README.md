@@ -18,8 +18,8 @@ Requirements:
 The following perl packages must be installed
 
 ```perl
-LWD
-LWD::UserAgent
+LWP
+LWP::UserAgent
 JSON
 Data::Dumper   (For Debugging)
 Term::ANSIColor
