@@ -5,8 +5,6 @@ use Getopt::Long;
 use Data::Dumper;
 use JSON;
 
-#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0;
-
 require "Nessus_REST.pm";
 
 # Declair variables to keep strict happy
@@ -63,7 +61,7 @@ elsif($list_policy_templates) {
 	list_policy_templates();
 }
 elsif($scan_export) {
-	scan_export($n);
+	scan_export($n,$x);
 }
 elsif($scan_download) {
 	scan_download($n,$x,$y);
@@ -137,7 +135,7 @@ sub list_policy_templates {
 
 sub scan_export {
 	&login;
-	&get_scan_export($n);
+	&get_scan_export($n,$x);
 	&get_export_status;
 	&logoff;	
 }
@@ -159,7 +157,4 @@ sub launch_scan {
 	&logoff;	
 }
 
-#print "\n";
-
 1;
-

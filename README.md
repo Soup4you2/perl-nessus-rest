@@ -21,8 +21,6 @@ The following perl packages must be installed
 LWP
 LWP::UserAgent
 JSON
-Data::Dumper   (For Debugging)
-Term::ANSIColor
 Getopt::Long
 ```
 

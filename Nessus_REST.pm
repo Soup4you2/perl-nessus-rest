@@ -5,7 +5,6 @@ use LWP;
 use LWP::UserAgent;
 use JSON;
 use Data::Dumper;
-use Term::ANSIColor qw(:constants);
 
 # Self signed cert, so don't verify the host info.
 BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 }
@@ -15,13 +14,12 @@ my $apibaseurl = 'https://127.0.0.1:8834/';
 my $username = 'username';
 my $password = 'password';
 
-
 # Create LWP User agent (web browser)
 my $ua = LWP::UserAgent->new;
 $ua->agent("OSC/5.1");
 
 sub login {
-	print GREEN, "\n\n***" . YELLOW, " Logging into Nessus server \n";
+	print "\n*** Logging into Nessus server \n";
 	# Create the POST request that sends the username and password
 	my $req = HTTP::Request->new(POST => $apibaseurl . 'session');
 	$req->content_type('application/x-www-form-urlencoded');
@@ -41,7 +39,7 @@ sub login {
 		exit;
 	};
 
-	print GREEN, "***" . YELLOW, " Received Auth Token:" . CYAN, " $NessusToken \n";
+	print "*** Received Auth Token: $NessusToken \n";
 
 	# Update headers to include token
 	our $h = new HTTP::Headers;
@@ -68,12 +66,11 @@ sub get_policy {
 	# Convert JSON data to Perl data structure
 	my $policydata = from_json($res->content);
 
-	#print BLUE, Dumper($policydata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\t\tPolicy List \n" . WHITE, "="x75 . "\n";
-	print WHITE, "ID \t Name \t\t\t Description \t\t UUID \n" . "-"x75 . "\n";
+	print "\n" . "="x75 . "\n\t\t\t\tPolicy List \n" .  "="x75 . "\n";
+	print "ID \t Name \t\t\t Description \t\t UUID \n" . "-"x75 . "\n";
 	
 	foreach my $x (@{$policydata->{'policies'}}) {
-		print CYAN, "$x->{'id'} \t $x->{'name'} \t\t\t $x->{'description'} \t\t\t $x->{'template_uuid'} \n";	
+		print "$x->{'id'} \t $x->{'name'} \t\t\t $x->{'description'} \t\t\t $x->{'template_uuid'} \n";	
 	};
 }
 
@@ -95,9 +92,8 @@ sub get_scans {
 	# Convert JSON data to Perl data structure
 	my $scandata = from_json($res->content);
 	
-	#print BLUE, Dumper($scandata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\t\tScan List \n" . WHITE, "="x75 . "\n";	
-	print RESET, "ID \t Name \t\t\t Status \t\t  \n" . "-"x75 . "\n";
+	print "\n" . "="x75 . "\n\t\t\t\tScan List \n" . "="x75 . "\n";	
+	print "ID \t Name \t\t\t Status \t\t  \n" . "-"x75 . "\n";
 
 	foreach my $x (@{$scandata->{'scans'}}) {
 		print "$x->{'id'} \t $x->{'name'} \t\t $x->{'status'} \n";
@@ -108,7 +104,7 @@ sub get_historyID {
 
 	# Check if scan_id was passed
 	if ($ARGV[0] eq '') {
-		warn RED, "\n*** ERROR: " . YELLOW, "Expected <scan_id> \n\n";
+		warn "\n*** ERROR: Expected <scan_id> \n\n";
 		die;
 	};
 	
@@ -128,10 +124,9 @@ sub get_historyID {
 	# Convert JSON data to Perl data structure
 	my $historydata = from_json($res->content);
 
-	#print BLUE, Dumper($historydata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\tScan History for Scan ID:" . CYAN, " $ARGV[0]" . "\n" . WHITE, "="x75 . "\n";
-	print WHITE, "ID \t Status \t\t UUID\n" . "-"x75 . "\n";
-	print RESET;
+	print "\n" . "="x75 . "\n\t\t\tScan History for Scan ID: $ARGV[0] \n" . "="x75 . "\n";
+	print "ID \t Status \t\t UUID\n" . "-"x75 . "\n";
+	
 	foreach my $x (@{$historydata->{'history'}}) {
 		print "$x->{'history_id'} \t $x->{'status'} \t\t $x->{'uuid'} \n";
 	};
@@ -141,28 +136,28 @@ sub get_historyID {
 sub get_scan_export {
 	# Check if scan_id was passed
 	if ($ARGV[1] eq '') {
-		warn RED, "\n*** ERROR: " . YELLOW, "Expected <scan_id> <history_ID> \n\n";
+		warn "\n*** ERROR: Expected <scan_id> <history_ID> \n\n";
 		die;
 	};
 	
-	print GREEN, "\n*** " . YELLOW, "Exporting Scan ID " . CYAN, "$ARGV[0]" . YELLOW, " To Nessus Format \n";
+	print "\n*** Exporting Scan ID $ARGV[0] To Nessus Format with history ID $ARGV[1] \n";
 
 	# Post to (/scans)
 	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/export" , $h);
 	$req->content_type('application/json; charset=UTF-8');
 
 	# Generate the JSON POST data.
-	my $json = "{
-		\"format\": \"nessus\", 
-		\"history_id\": \"${ARGV[1]}\"
-	}";
+	my $json = '{
+		"format": "nessus",
+		"history_id": '.$ARGV[1].'
+	}';
 
 	# Populate the BODY with JSON encoded data.
 	$req->content($json);
 	
 	# Send the request
 	$res = $ua->request($req);
-	#print Dumper($req);
+	print Dumper($req);
 	
 	# Test for failure
 	if (!$res->is_success) {
@@ -171,14 +166,9 @@ sub get_scan_export {
 		exit
 	}
 	
-	#print Dumper($res);
-	
 	# Convert JSON data to Perl data structure
 	my $postdata = from_json($res->content);
 	
-	#print BLUE, Dumper($postdata);
-	
-	print RESET;
 	print "*** Exported to file ID: $postdata->{'file'} \n";
 	#print "$postdata->{'file'} \n";
 	
@@ -205,10 +195,8 @@ sub get_export_status {
 		exit
 	}	
 
-	#print Dumper($res->content);
 	my $exportstatus = from_json($res->content);
-	#print GREEN, "***" . YELLOW " Current Export Status: " . CYAN, "$exportstatus->{'status'} \n";
-	print RESET;
+
 	print "*** Current Export Status: $exportstatus->{'status'} \n";
 	
 	if ($exportstatus->{'status'} ne "ready") {
@@ -219,15 +207,12 @@ sub get_export_status {
 
 sub get_scan_download {
 
-	#use vars qw( $exportID );
-
-	print GREEN, "***" . YELLOW, " Downloading File ID: " . CYAN, "${ARGV[1]}" . YELLOW, " For Scan ID: " . CYAN, "$ARGV[0] \n"; 
+	print "*** Downloading File ID: ${ARGV[1]} For Scan ID: $ARGV[0] \n"; 
 	my $req = HTTP::Request->new('GET' , $apibaseurl . "scans/${ARGV[0]}/export/${ARGV[1]}/download" , $h);
 	$req->content_type('application/json; charset=UTF-8');
 	
 	# Send the request to the server
 	$res = $ua->request($req);
-	#print Dumper($req);
 	# Test for failute
 	if (!$res->is_success) {
 		warn $res->status_line . "\n";
@@ -237,12 +222,11 @@ sub get_scan_download {
 
 	# Output results to a a file
 	if ($ARGV[1] eq '') {
-		warn RED, "\n*** ERROR: " . YELLOW, "Expected <scan_id> <output_file> \n\n";
+		warn "\n*** ERROR: Expected <scan_id> <output_file> \n\n";
 		die;	
 	}
 	
-	#print Dumper($res->content);
-	print GREEN, "***" . YELLOW, " Saving Nessus XML v2 format file as: " . CYAN, "$ARGV[2]" . "\n";
+	print "*** Saving Nessus XML v2 format file as: $ARGV[2] \n";
 	open(FILE, "> $ARGV[2]") or error_msg("Failed to write report file $ARGV[2]: $!");
 	print FILE $res->content;
 	close FILE;
@@ -266,12 +250,11 @@ sub get_scanners {
 	# Convert JSON data to Perl data structure
 	my $scannerdata = from_json($res->content);
 	
-	#print BLUE, Dumper($scannerdata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\t\tScanner List \n" . WHITE, "="x75 . "\n";	
-	print WHITE, "ID \t Name \t\t\t UUID \n" . "-"x75 . "\n";
+	print "\n" . "="x75 . "\n\t\t\t\tScanner List \n" . "="x75 . "\n";	
+	print "ID \t Name \t\t\t UUID \n" . "-"x75 . "\n";
 
 	foreach my $x (@{$scannerdata}) {
-		print CYAN, "$x->{'id'} \t $x->{'name'} \t\t $x->{'uuid'} \n";
+		print "$x->{'id'} \t $x->{'name'} \t\t $x->{'uuid'} \n";
 	}	
 
 }
@@ -294,12 +277,11 @@ sub get_folders {
 	# Convert JSON data to Perl data structure
 	my $folderdata = from_json($res->content);
 	
-	#print BLUE, Dumper($folderdata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\t\tFolder List \n" . WHITE, "="x75 . "\n";	
-	print WHITE, "ID \t Name \n" . "-"x75 . "\n";
+	print "\n" . "="x75 . "\n\t\t\t\tFolder List \n" ."="x75 . "\n";	
+	print "ID \t Name \n" . "-"x75 . "\n";
 
 	foreach my $x (@{$folderdata->{'folders'}}) {
-		print CYAN, "$x->{'id'} \t $x->{'name'} \n";
+		print "$x->{'id'} \t $x->{'name'} \n";
 	}	
 
 }
@@ -322,12 +304,11 @@ sub get_policy_templates {
 	# Convert JSON data to Perl data structure
 	my $folderdata = from_json($res->content);
 	
-	#print BLUE, Dumper($folderdata);
-	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\t\tPolicy Template List \n" . WHITE, "="x75 . "\n";	
-	print WHITE, "Title \t\t\tUUID \n" . "-"x75 . "\n";
+	print "\n" . "="x75 . "\n\t\t\t\tPolicy Template List \n" . "="x75 . "\n";	
+	print "Title \t\t\tUUID \n" . "-"x75 . "\n";
 
 	foreach my $x (@{$folderdata->{'templates'}}) {
-		print CYAN, "$x->{'title'} \t\t\t $x->{'uuid'} \n";
+		print "$x->{'title'} \t\t\t $x->{'uuid'} \n";
 	}	
 
 }
@@ -335,13 +316,12 @@ sub get_policy_templates {
 sub create_nessus_scan {
 	
 	if ($ARGV[5] eq '') {
-		warn RED, "\n*** ERROR: " . YELLOW, "Expected <template_policy_uuid> <scan_label> <folder_id> <policy_id> <scanner_id> <targets_file>\n\n";
+		warn "\n*** ERROR: Expected <template_policy_uuid> <scan_label> <folder_id> <policy_id> <scanner_id> <targets_file>\n\n";
 		die;
 	};	
 	
-	print GREEN, "*** " . YELLOW, "Creating new Scan " . CYAN, "$ARGV[1]" . YELLOW, " \n";
+	print "*** Creating new Scan $ARGV[1] \n";
 	
-
 	# Post to (/scans)
 	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans" , $h);
 	$req->content_type('application/json; charset=UTF-8');
@@ -364,7 +344,6 @@ sub create_nessus_scan {
 	
 	# Send the request
 	$res = $ua->request($req);
-	#print Dumper($req);
 	
 	# Test for failure
 	if (!$res->is_success) {
@@ -375,17 +354,16 @@ sub create_nessus_scan {
 	
 	# Convert JSON data to Perl data structure
 	my $postdata = from_json($res->content);
-	#print BLUE, Dumper($postdata);
 }
 
 sub launch_nessus_scan {
 	# Check if scan_id was passed
 	if ($ARGV[0] eq '') {
-		warn RED, "*** ERROR: " . YELLOW, "Expected <scan_id> \n\n";
+		warn "*** ERROR: Expected <scan_id> \n\n";
 		die;
 	};
 	
-	print GREEN, "*** " . YELLOW, "Launching Scan ID: " . CYAN, "$ARGV[0]" . YELLOW, " \n";
+	print "*** Launching Scan ID: $ARGV[0] \n";
 	
 	# Post to (/scans/{scan_id}/launch
 	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/launch" , $h);
@@ -394,8 +372,6 @@ sub launch_nessus_scan {
 	
 	# Send the request
 	$res = $ua->request($req);
-	
-	#print Dumper($req);
 	
 	# Test for failure
 	if (!$res->is_success) {
@@ -407,9 +383,7 @@ sub launch_nessus_scan {
 }
 
 sub logoff {
-	#print GREEN, "\n*** " . YELLOW, "Destroying Session: " . CYAN, "$NessusToken" . YELLOW, " \n";
-	
-	# Post to (/session
+	# Post to (/session)
 	my $req = HTTP::Request->new('DELETE' , $apibaseurl . "session" , $h);
 	$req->content_type('application/x-www-form-urlencoded');
 	
