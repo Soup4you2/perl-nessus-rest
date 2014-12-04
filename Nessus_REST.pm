@@ -149,7 +149,7 @@ sub get_scan_export {
 	# Generate the JSON POST data.
 	my $json = '{
 		"format": "nessus",
-		"history_id": '.$ARGV[1].'
+		"history_id": "'.$ARGV[1].'"
 	}';
 
 	# Populate the BODY with JSON encoded data.
