@@ -40,7 +40,7 @@ Usage:
     --list-folders                                          - List the available scan folders
     --list-policy-templates                                 - List of pre-configured policy templates
     --scan-export                                           - Export a scan to Nessus XML v2 Format
-            <scan_id>
+            <scan_id> <historyID>
     --scan-download                                         - Download a scan after an export
             <scan_id> <export_file_id> <save as>
     --create-scan                                           - Define a new ON DEMAND scan
