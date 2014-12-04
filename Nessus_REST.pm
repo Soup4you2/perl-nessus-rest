@@ -1,4 +1,21 @@
 #!/usr/bin/perl
+#============================================================================
+# LICENSE
+#============================================================================
+#This file is part of Open Security Center.
+#
+#    Open Security Center is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    Open Security Center is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use LWP;
@@ -15,9 +32,10 @@ my $apibaseurl = 'https://127.0.0.1:8834/';
 my $username = 'username';
 my $password = 'password';
 
+
 # Create LWP User agent (web browser)
 my $ua = LWP::UserAgent->new;
-$ua->agent("OSC/0.1");
+$ua->agent("OSC/5.1");
 
 sub login {
 	print GREEN, "\n\n***" . YELLOW, " Logging into Nessus server \n";
@@ -130,8 +148,9 @@ sub get_historyID {
 	#print BLUE, Dumper($historydata);
 	print WHITE, "\n" . "="x75 . MAGENTA, "\n\t\t\tScan History for Scan ID:" . CYAN, " $ARGV[0]" . "\n" . WHITE, "="x75 . "\n";
 	print WHITE, "ID \t Status \t\t UUID\n" . "-"x75 . "\n";
+	print RESET;
 	foreach my $x (@{$historydata->{'history'}}) {
-		print CYAN, "$x->{'history_id'} \t $x->{'status'} \t\t $x->{'uuid'} \n";
+		print "$x->{'history_id'} \t $x->{'status'} \t\t $x->{'uuid'} \n";
 	};
 	
 }
@@ -144,13 +163,23 @@ sub get_scan_export {
 	};
 	
 	print GREEN, "\n*** " . YELLOW, "Exporting Scan ID " . CYAN, "$ARGV[0]" . YELLOW, " To Nessus Format \n";
-	
-	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/export" , $h);
-	$req->content_type('application/x-www-form-urlencoded');
-	$req->content("scan_id=${ARGV[0]}&format=nessus");
+
+	# Post to (/scans)
+	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/180/export" , $h);
+	$req->content_type('application/json; charset=UTF-8');
+
+	# Generate the JSON POST data.
+	my $json = '{
+		"format": "nessus", 
+		"history_id": "181"
+	}';
+
+	# Populate the BODY with JSON encoded data.
+	$req->content($json);
 	
 	# Send the request
 	$res = $ua->request($req);
+	#print Dumper($req);
 	
 	# Test for failure
 	if (!$res->is_success) {
@@ -159,23 +188,27 @@ sub get_scan_export {
 		exit
 	}
 	
+	#print Dumper($res);
+	
 	# Convert JSON data to Perl data structure
 	my $postdata = from_json($res->content);
 	
 	#print BLUE, Dumper($postdata);
-	#print GREEN, "*** " . YELLOW, "Exported to file ID: ";
+	
 	print RESET;
 	print "*** Exported to file ID: $postdata->{'file'} \n";
 	#print "$postdata->{'file'} \n";
 	
 	# Set a variable for later use.
-	our $exportID=$postdata->{'file'};
-};
+	our $exportID=$postdata->{'file'};	
+}
+
+
 
 sub get_export_status {
 	
 	use vars qw( $exportID );
-	
+		
 	my $req = HTTP::Request->new('GET' , $apibaseurl . "scans/${ARGV[0]}/export/${exportID}/status" , $h);
 	$req->content_type('application/json; charset=UTF-8');
 	
@@ -211,8 +244,6 @@ sub get_scan_download {
 	
 	# Send the request to the server
 	$res = $ua->request($req);
-
-	#print "*** DEBUGGING: Sending Request \n";
 	#print Dumper($req);
 	# Test for failute
 	if (!$res->is_success) {
@@ -227,17 +258,11 @@ sub get_scan_download {
 		die;	
 	}
 	
-	#print "*** DEBUGGING: RESPONSE RECEIVED\n";
-	#print Dumper($res);
-
-	#print "*"x80 . "\n";
 	#print Dumper($res->content);
-
 	print GREEN, "***" . YELLOW, " Saving Nessus XML v2 format file as: " . CYAN, "$ARGV[2]" . "\n";
 	open(FILE, "> $ARGV[2]") or error_msg("Failed to write report file $ARGV[2]: $!");
 	print FILE $res->content;
 	close FILE;
-
 }
 
 sub get_scanners {
@@ -417,3 +442,9 @@ sub logoff {
 }
 
 1;
+
+
+
+
+
+

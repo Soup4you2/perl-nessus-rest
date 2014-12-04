@@ -1,4 +1,21 @@
 #!/usr/bin/perl -w
+#============================================================================
+# LICENSE
+#============================================================================
+#This file is part of Open Security Center.
+#
+#    Open Security Center is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    Open Security Center is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use Getopt::Long;
@@ -89,7 +106,7 @@ sub print_help {
 		--list-folders						- List the available scan folders
 		--list-policy-templates					- List of pre-configured policy templates
 		--scan-export 						- Export a scan to Nessus XML v2 Format
-			<scan_id>
+			<scan_id> <history_id>
 		--scan-download						- Download a scan after an export
 			<scan_id> <export_file_id> <save as>
 		--create-scan 						- Define a new ON DEMAND scan
