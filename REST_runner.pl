@@ -2,7 +2,6 @@
 
 use strict;
 use Getopt::Long;
-use Data::Dumper;
 use JSON;
 
 require "Nessus_REST.pm";
