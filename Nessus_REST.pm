@@ -140,22 +140,22 @@ sub get_historyID {
 
 sub get_scan_export {
 	# Check if scan_id was passed
-	if ($ARGV[0] eq '') {
-		warn RED, "\n*** ERROR: " . YELLOW, "Expected <scan_id> \n\n";
+	if ($ARGV[1] eq '') {
+		warn RED, "\n*** ERROR: " . YELLOW, "Expected <scan_id> <history_ID> \n\n";
 		die;
 	};
 	
 	print GREEN, "\n*** " . YELLOW, "Exporting Scan ID " . CYAN, "$ARGV[0]" . YELLOW, " To Nessus Format \n";
 
 	# Post to (/scans)
-	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/180/export" , $h);
+	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/export" , $h);
 	$req->content_type('application/json; charset=UTF-8');
 
 	# Generate the JSON POST data.
-	my $json = '{
-		"format": "nessus", 
-		"history_id": "181"
-	}';
+	my $json = "{
+		\"format\": \"nessus\", 
+		\"history_id\": \"${ARGV[1]}\"
+	}";
 
 	# Populate the BODY with JSON encoded data.
 	$req->content($json);
