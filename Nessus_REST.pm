@@ -22,8 +22,8 @@ sub login {
 	print "\n*** Logging into Nessus server \n";
 	# Create the POST request that sends the username and password
 	my $req = HTTP::Request->new(POST => $apibaseurl . 'session');
-	$req->content_type('application/x-www-form-urlencoded');
-	$req->content("username=$username&password=$password");
+	$req->content_type('application/json');
+	$req->content("{\"username\"=\"$username\",\"password\":\"$password\"}");
 
 	# Send the request to the Nessus API  ( /session )
 	our $res = $ua->request($req);
@@ -367,8 +367,8 @@ sub launch_nessus_scan {
 	
 	# Post to (/scans/{scan_id}/launch
 	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/launch" , $h);
-	$req->content_type('application/x-www-form-urlencoded');
-	$req->content("scan_id=${ARGV[0]}");
+	$req->content_type('application/json');
+	$req->content("{\"scan_id\":\"${ARGV[0]}\"}");
 	
 	# Send the request
 	$res = $ua->request($req);
@@ -385,7 +385,7 @@ sub launch_nessus_scan {
 sub logoff {
 	# Post to (/session)
 	my $req = HTTP::Request->new('DELETE' , $apibaseurl . "session" , $h);
-	$req->content_type('application/x-www-form-urlencoded');
+	$req->content_type('application/json');
 	
 	# Send the request
 	$res = $ua->request($req);
