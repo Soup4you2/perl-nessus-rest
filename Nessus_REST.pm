@@ -10,7 +10,7 @@ use Data::Dumper;
 BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 }
 
 # Config Variables
-my $apibaseurl = 'https://127.0.0.1:8834/';
+my $apibaseurl = 'https://127.0.0.1:8443/';
 my $username = 'username';
 my $password = 'password';
 
@@ -22,10 +22,17 @@ sub login {
 	print "\n*** Logging into Nessus server \n";
 	# Create the POST request that sends the username and password
 	my $req = HTTP::Request->new(POST => $apibaseurl . 'session');
-	$req->content_type('application/json');
-	$req->content("{\"username\"=\"$username\",\"password\":\"$password\"}");
+	#$req->content_type('application/x-www-form-urlencoded');
+	#$req->content("username=$username&password=$password");
+	$req->content_type('application/json; charset=UTF-8');
 
-	# Send the request to the Nessus API  ( /session )
+	my $json = '{
+		"username": "'.$username.'",
+		"password": "'.$password.'"
+	}';
+
+	$req->content($json);
+
 	our $res = $ua->request($req);
 
 	# See is the login worked, and if so get the session token
@@ -368,11 +375,17 @@ sub launch_nessus_scan {
 	# Post to (/scans/{scan_id}/launch
 	my $req = HTTP::Request->new('POST' , $apibaseurl . "scans/${ARGV[0]}/launch" , $h);
 	$req->content_type('application/json');
-	$req->content("{\"scan_id\":\"${ARGV[0]}\"}");
+	#$req->content("{\"scan_id\":\"${ARGV[0]}\"}");
 	
+	my $json = '{
+		"scan_id": "'.$ARGV[0].'"
+	}';
+
 	# Send the request
-	$res = $ua->request($req);
-	
+	$req->content($json);
+
+	our $res = $ua->request($req);	
+
 	# Test for failure
 	if (!$res->is_success) {
 		warn $res->status_line . "\n";
