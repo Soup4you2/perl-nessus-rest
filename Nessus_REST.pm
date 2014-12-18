@@ -18,6 +18,9 @@ my $password = 'password';
 my $ua = LWP::UserAgent->new;
 $ua->agent("OSC/5.1");
 
+# Use a proxy server. Uncomment if needed.
+# ua->proxy(https => 'http://127.0.0.1:8080/');
+
 sub login {
 	print "\n*** Logging into Nessus server \n";
 	# Create the POST request that sends the username and password
