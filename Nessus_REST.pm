@@ -10,7 +10,7 @@ use Data::Dumper;
 BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 }
 
 # Config Variables
-my $apibaseurl = 'https://127.0.0.1:8443/';
+my $apibaseurl = 'https://127.0.0.1:8834/';
 my $username = 'username';
 my $password = 'password';
 
@@ -19,7 +19,7 @@ my $ua = LWP::UserAgent->new;
 $ua->agent("OSC/5.1");
 
 # Use a proxy server. Uncomment if needed.
-# ua->proxy(https => 'http://127.0.0.1:8080/');
+# $ua->proxy(https => 'http://127.0.0.1:8080/');
 
 sub login {
 	print "\n*** Logging into Nessus server \n";
