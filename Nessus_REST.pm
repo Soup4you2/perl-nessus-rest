@@ -15,7 +15,7 @@ my $username = 'username';
 my $password = 'password';
 
 # Create LWP User agent (web browser)
-my $ua = LWP::UserAgent->new;
+my $ua = LWP::UserAgent->new(keep_alive => 1);
 $ua->agent("OSC/5.1");
 
 # Use a proxy server. Uncomment if needed.
